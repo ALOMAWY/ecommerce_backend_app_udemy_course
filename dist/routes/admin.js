@@ -13,29 +13,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const user_1 = require("../services/user");
-const validators_1 = require("../validators");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const errorHandler_1 = require("../middlewares/errorHandler");
 const router = express_1.default.Router();
-router.post("/register", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { firstName, lastName, email, password } = validators_1.registerSchema.parse(req.body);
-        const { statusCode, data } = yield (0, user_1.register)({ firstName, lastName, email, password });
-        if (statusCode >= 400)
-            throw new errorHandler_1.AppError(data, statusCode);
-        res.status(statusCode).json(data);
-    }
-    catch (err) {
-        next(err);
-    }
-}));
 router.post("/login", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { email, password } = validators_1.loginSchema.parse(req.body);
-        const { statusCode, data } = yield (0, user_1.login)({ email, password });
-        if (statusCode >= 400)
-            throw new errorHandler_1.AppError(data, statusCode);
-        res.status(statusCode).json(data);
+        const { email, password } = req.body;
+        if (!email || !password) {
+            throw new errorHandler_1.AppError("Email and password are required", 400);
+        }
+        const adminEmail = process.env.ADMIN_EMAIL;
+        const adminPassword = process.env.ADMIN_PASSWORD;
+        if (email !== adminEmail || password !== adminPassword) {
+            throw new errorHandler_1.AppError("Invalid admin credentials", 401);
+        }
+        const token = jsonwebtoken_1.default.sign({ email, isAdmin: true }, process.env.JWT_SECRET || "", { expiresIn: "1h" });
+        res.json({ token, email, isAdmin: true });
     }
     catch (err) {
         next(err);

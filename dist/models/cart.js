@@ -44,7 +44,7 @@ const cartItemSchema = new mongoose_1.Schema({
 const cartSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     items: [cartItemSchema],
-    totalAmount: { type: Number, required: true, default: 1 },
+    totalAmount: { type: Number, required: true, default: 0 },
     status: { type: String, enum: CartStatusEnum, default: "active" },
 });
 exports.cartModel = mongoose_1.default.model("Cart", cartSchema);

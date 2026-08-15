@@ -15,86 +15,96 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cart_1 = require("../services/cart");
 const jwt_1 = __importDefault(require("../middlewares/jwt"));
+const validators_1 = require("../validators");
+const errorHandler_1 = require("../middlewares/errorHandler");
 const router = express_1.default.Router();
-router.get("/", jwt_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/", jwt_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
+        const userId = String(((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) || "");
         const cart = yield (0, cart_1.getActiveCartForUser)({ userId, populateProduct: true });
         res.status(200).send(cart);
     }
-    catch (error) {
-        console.error("Somthing went wrong !", error);
+    catch (err) {
+        next(err);
     }
 }));
-router.post("/items", jwt_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/items", jwt_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
-        const { productId, quantity } = req.body;
+        const userId = String(((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) || "");
+        const { productId, quantity } = validators_1.addItemSchema.parse(req.body);
         const response = yield (0, cart_1.addItemToCart)({ userId, productId, quantity });
+        if (response.statusCode >= 400)
+            throw new errorHandler_1.AppError(response.data, response.statusCode);
         res.status(response.statusCode).send(response.data);
     }
-    catch (error) {
-        console.error("Somthing went wrong !", error);
+    catch (err) {
+        next(err);
     }
 }));
-router.put("/items", jwt_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.put("/items", jwt_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
-        const { productId, quantity } = req.body;
+        const userId = String(((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) || "");
+        const { productId, quantity } = validators_1.updateItemSchema.parse(req.body);
         const response = yield (0, cart_1.updateItemInCart)({ userId, productId, quantity });
+        if (response.statusCode >= 400)
+            throw new errorHandler_1.AppError(response.data, response.statusCode);
         res.status(response.statusCode).send(response.data);
     }
-    catch (error) {
-        console.error("Somthing went wrong !", error);
+    catch (err) {
+        next(err);
     }
 }));
-router.delete("/items/:id", jwt_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete("/items/:id", jwt_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
-        const productId = req.params.id;
+        const userId = String(((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) || "");
+        const productId = String(req.params.id);
         const response = yield (0, cart_1.deleteItemInCart)({ userId, productId });
+        if (response.statusCode >= 400)
+            throw new errorHandler_1.AppError(response.data, response.statusCode);
         res.status(response.statusCode).send(response.data);
     }
-    catch (error) {
-        console.error("Somthing went wrong !", error);
+    catch (err) {
+        next(err);
     }
 }));
-router.delete("/", jwt_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.delete("/", jwt_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const userId = String(((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) || "");
         const response = yield (0, cart_1.clearCart)({ userId });
         res.status(response.statusCode).send(response.data);
     }
-    catch (error) {
-        console.error("Somthing went wrong !", error);
+    catch (err) {
+        next(err);
     }
 }));
-router.post("/checkout", jwt_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.post("/checkout", jwt_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
-        const { address } = req.body;
+        const userId = String(((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) || "");
+        const { address } = validators_1.checkoutSchema.parse(req.body);
         const response = yield (0, cart_1.checkout)({ userId, address });
+        if ((response === null || response === void 0 ? void 0 : response.statusCode) && response.statusCode >= 400)
+            throw new errorHandler_1.AppError(response.data, response.statusCode);
         res.status(response === null || response === void 0 ? void 0 : response.statusCode).send(response.data);
     }
-    catch (error) {
-        console.error("Somthing went wrong !", error);
+    catch (err) {
+        next(err);
     }
 }));
-router.get("/orders", jwt_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/orders", jwt_1.default, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const userId = String(((_a = req.user) === null || _a === void 0 ? void 0 : _a._id) || "");
         const response = yield (0, cart_1.getOrderByUserId)({ userId });
         res.status(response === null || response === void 0 ? void 0 : response.statusCode).send(response.data);
     }
-    catch (error) {
-        console.error("Somthing went wrong");
+    catch (err) {
+        next(err);
     }
 }));
 exports.default = router;

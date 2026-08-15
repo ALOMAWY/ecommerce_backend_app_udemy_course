@@ -35,10 +35,14 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductModel = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
+const CATEGORIES = ["mobile-accessories", "pc-accessories", "tech-tools", "other"];
 const ProductSchema = new mongoose_1.Schema({
     title: { type: String, required: true },
-    image: { type: String, required: true },
+    image: { type: String, default: "" },
+    images: { type: [String], default: [] },
+    description: { type: String, default: "" },
+    category: { type: String, enum: CATEGORIES, default: "other" },
     price: { type: Number, required: true },
     stock: { type: Number, required: true, default: 0 },
-});
+}, { timestamps: true });
 exports.ProductModel = mongoose_1.default.model("Product", ProductSchema);

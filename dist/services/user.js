@@ -27,7 +27,7 @@ const register = (_a) => __awaiter(void 0, [_a], void 0, function* ({ firstName,
         email,
         password: hashedPasseword,
     });
-    newUser.save();
+    yield newUser.save();
     return { data: generateJWT({ firstName, lastName, email }), statusCode: 200 };
 });
 exports.register = register;
