@@ -22,7 +22,6 @@ const calculateCartItemsTotal = ({ cartItems }) => {
 };
 const createCartForUser = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userId }) {
     const cart = yield cart_1.cartModel.create({ userId, totalAmount: 0 });
-    cart.save();
     return cart;
 });
 const getActiveCartForUser = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userId, populateProduct, }) {
@@ -45,8 +44,8 @@ const addItemToCart = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userI
     const cart = yield (0, exports.getActiveCartForUser)({ userId });
     const existingProduct = cart.items.find((p) => p.product.toString() === productId);
     if (existingProduct) {
-        existingProduct.quantity++;
-        cart.totalAmount += existingProduct.unitPrice;
+        existingProduct.quantity += quantity;
+        cart.totalAmount += existingProduct.unitPrice * quantity;
         yield cart.save();
         return {
             data: yield (0, exports.getActiveCartForUser)({ userId, populateProduct: true }),
@@ -139,7 +138,6 @@ const checkout = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userId, ad
         address,
         total: cart.totalAmount,
     });
-    yield order.save();
     cart.status = "completed";
     yield cart.save();
     return { data: order, statusCode: 200 };

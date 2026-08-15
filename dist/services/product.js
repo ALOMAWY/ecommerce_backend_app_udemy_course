@@ -24,7 +24,7 @@ exports.getAllProducts = getAllProducts;
 const createProduct = (_a) => __awaiter(void 0, [_a], void 0, function* ({ title, image, price, stock, }) {
     try {
         const product = new product_1.ProductModel({ title, image, price, stock });
-        product.save();
+        yield product.save();
         if (!product)
             return { statusCode: 500, data: "Somthing Went Wrong!" };
         return { statusCode: 200, data: product };
@@ -34,6 +34,16 @@ const createProduct = (_a) => __awaiter(void 0, [_a], void 0, function* ({ title
     }
 });
 exports.createProduct = createProduct;
+const categoryFromTitle = (title) => {
+    const t = title.toLowerCase();
+    if (t.includes("airpods") || t.includes("buds") || t.includes("iphone") || t.includes("galaxy s") || t.includes("galaxy tab") || t.includes("pixel") || t.includes("oneplus") || t.includes("ipad"))
+        return "mobile-accessories";
+    if (t.includes("watch") || t.includes("headphone") || t.includes("headset") || t.includes("gopro") || t.includes("dji") || t.includes("drone"))
+        return "tech-tools";
+    if (t.includes("mouse") || t.includes("keyboard") || t.includes("monitor") || t.includes("laptop") || t.includes("notebook") || t.includes("macbook") || t.includes("victus") || t.includes("nitro") || t.includes("katana") || t.includes("tuf") || t.includes("legion") || t.includes("blade") || t.includes("xps"))
+        return "pc-accessories";
+    return "other";
+};
 const seedInitialProducts = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const initialProducts = [
@@ -191,8 +201,10 @@ const seedInitialProducts = () => __awaiter(void 0, void 0, void 0, function* ()
         const products = yield (0, exports.getAllProducts)();
         if (!products)
             return { data: "Somthing went wrong !", statusCode: 400 };
-        if (products.length === 0)
-            yield product_1.ProductModel.insertMany(initialProducts);
+        if (products.length === 0) {
+            const categorized = initialProducts.map((p) => (Object.assign(Object.assign({}, p), { category: categoryFromTitle(p.title) })));
+            yield product_1.ProductModel.insertMany(categorized);
+        }
     }
     catch (error) {
         console.error("Somthing went wrong !", error);

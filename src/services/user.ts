@@ -33,7 +33,7 @@ export const register = async ({
     password: hashedPasseword,
   });
 
-  newUser.save();
+  await newUser.save();
 
   return { data: generateJWT({ firstName, lastName, email }), statusCode: 200 };
 };
