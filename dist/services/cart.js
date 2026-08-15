@@ -67,6 +67,9 @@ const addItemToCart = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userI
 });
 exports.addItemToCart = addItemToCart;
 const updateItemInCart = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userId, productId, quantity, }) {
+    if (quantity < 1) {
+        return { data: "quantity must be at least 1", statusCode: 400 };
+    }
     const cart = yield (0, exports.getActiveCartForUser)({ userId });
     const existingProduct = cart.items.find((p) => p.product.toString() === productId);
     if (!existingProduct) {

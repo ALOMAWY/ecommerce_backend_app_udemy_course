@@ -114,6 +114,10 @@ export const updateItemInCart = async ({
   productId,
   quantity,
 }: IUpdateItemToCart) => {
+  if (quantity < 1) {
+    return { data: "quantity must be at least 1", statusCode: 400 };
+  }
+
   const cart = await getActiveCartForUser({ userId });
 
   const existingProduct = cart.items.find(
