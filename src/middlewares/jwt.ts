@@ -36,6 +36,10 @@ const validateJWT = (
     const userPayload = payload as IUser;
 
     const user = await userModel.findOne({ email: userPayload.email });
+    if (!user) {
+      response.status(403).send("User not found");
+      return;
+    }
     requset.user = user;
     next();
   });
