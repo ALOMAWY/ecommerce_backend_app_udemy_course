@@ -44,7 +44,6 @@ const calculateCartItemsTotal = ({ cartItems }: { cartItems: ICartItem[] }) => {
 
 const createCartForUser = async ({ userId }: ICreateCartForUser) => {
   const cart = await cartModel.create({ userId, totalAmount: 0 });
-  cart.save();
   return cart;
 };
 
@@ -79,9 +78,9 @@ export const addItemToCart = async ({
   );
 
   if (existingProduct) {
-    existingProduct.quantity++;
+    existingProduct.quantity += quantity;
 
-    cart.totalAmount += existingProduct.unitPrice;
+    cart.totalAmount += existingProduct.unitPrice * quantity;
 
     await cart.save();
 
@@ -220,8 +219,6 @@ export const checkout = async ({ userId, address }: ICheckOut) => {
     address,
     total: cart.totalAmount,
   });
-
-  await order.save();
 
   cart.status = "completed";
 
