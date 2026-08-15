@@ -18,7 +18,7 @@ export const createProduct = async ({
 }: IProduct) => {
   try {
     const product = new ProductModel({ title, image, price, stock });
-    product.save();
+    await product.save();
 
     if (!product) return { statusCode: 500, data: "Somthing Went Wrong!" };
 
@@ -26,6 +26,14 @@ export const createProduct = async ({
   } catch (error) {
     console.error("Somthing went wrong !", error);
   }
+};
+
+const categoryFromTitle = (title: string): string => {
+  const t = title.toLowerCase();
+  if (t.includes("airpods") || t.includes("buds") || t.includes("iphone") || t.includes("galaxy s") || t.includes("galaxy tab") || t.includes("pixel") || t.includes("oneplus") || t.includes("ipad")) return "mobile-accessories";
+  if (t.includes("watch") || t.includes("headphone") || t.includes("headset") || t.includes("gopro") || t.includes("dji") || t.includes("drone")) return "tech-tools";
+  if (t.includes("mouse") || t.includes("keyboard") || t.includes("monitor") || t.includes("laptop") || t.includes("notebook") || t.includes("macbook") || t.includes("victus") || t.includes("nitro") || t.includes("katana") || t.includes("tuf") || t.includes("legion") || t.includes("blade") || t.includes("xps")) return "pc-accessories";
+  return "other";
 };
 
 export const seedInitialProducts = async () => {
@@ -212,7 +220,13 @@ export const seedInitialProducts = async () => {
 
     if (!products) return { data: "Somthing went wrong !", statusCode: 400 };
 
-    if (products.length === 0) await ProductModel.insertMany(initialProducts);
+    if (products.length === 0) {
+      const categorized = initialProducts.map((p) => ({
+        ...p,
+        category: categoryFromTitle(p.title),
+      }));
+      await ProductModel.insertMany(categorized);
+    }
   } catch (error) {
     console.error("Somthing went wrong !", error);
   }
