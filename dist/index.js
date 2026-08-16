@@ -26,11 +26,17 @@ const app = (0, express_1.default)();
 const port = process.env.PORT || 5000;
 app.use((0, helmet_1.default)());
 app.use((0, compression_1.default)());
-const corsOrigin = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
-    : "http://localhost:5173";
+const allowedOrigins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "https://techhub-e-commerce.netlify.app",
+    ...(process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+        : []),
+];
 app.use((0, cors_1.default)({
-    origin: corsOrigin,
+    origin: allowedOrigins,
     credentials: true,
 }));
 app.use((0, express_rate_limit_1.default)({
