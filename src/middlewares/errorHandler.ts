@@ -32,6 +32,11 @@ export const errorHandler = (
     return;
   }
 
+  if (err.name === "CastError") {
+    res.status(400).json({ error: "Invalid id format" });
+    return;
+  }
+
   console.error("Unhandled error:", err);
   res.status(500).json({
     error: "Internal Server Error",

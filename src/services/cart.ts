@@ -1,4 +1,4 @@
-import { ObjectId } from "mongoose";
+import mongoose from "mongoose";
 import { cartModel, ICartItem } from "../models/cart";
 import { IOrderItem, orderModel } from "../models/order";
 import { IProduct, ProductModel } from "../models/product";
@@ -71,6 +71,10 @@ export const addItemToCart = async ({
   productId,
   quantity,
 }: IAddItemToCart) => {
+  if (!mongoose.isValidObjectId(productId)) {
+    return { data: "Product Not Found", statusCode: 400 };
+  }
+
   const cart = await getActiveCartForUser({ userId });
 
   const existingProduct = cart.items.find(
@@ -116,6 +120,10 @@ export const updateItemInCart = async ({
 }: IUpdateItemToCart) => {
   if (quantity < 1) {
     return { data: "quantity must be at least 1", statusCode: 400 };
+  }
+
+  if (!mongoose.isValidObjectId(productId)) {
+    return { data: "item Dose Not Exist In Cart !", statusCode: 400 };
   }
 
   const cart = await getActiveCartForUser({ userId });
@@ -204,6 +212,9 @@ export const checkout = async ({ userId, address }: ICheckOut) => {
   if (!cart.items || cart.items.length === 0)
     return { data: "items dose not include products", statusCode: 400 };
   for (const item of cart.items) {
+    if (!mongoose.isValidObjectId(item.product)) {
+      return { data: "Product not found", statusCode: 400 };
+    }
     const product = await ProductModel.findById(item.product);
     if (!product) return { data: "Product not found", statusCode: 400 };
 
