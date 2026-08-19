@@ -8,8 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOrderByUserId = exports.checkout = exports.clearCart = exports.deleteItemInCart = exports.updateItemInCart = exports.addItemToCart = exports.getActiveCartForUser = void 0;
+const mongoose_1 = __importDefault(require("mongoose"));
 const cart_1 = require("../models/cart");
 const order_1 = require("../models/order");
 const product_1 = require("../models/product");
@@ -41,6 +45,9 @@ const getActiveCartForUser = (_a) => __awaiter(void 0, [_a], void 0, function* (
 });
 exports.getActiveCartForUser = getActiveCartForUser;
 const addItemToCart = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userId, productId, quantity, }) {
+    if (!mongoose_1.default.isValidObjectId(productId)) {
+        return { data: "Product Not Found", statusCode: 400 };
+    }
     const cart = yield (0, exports.getActiveCartForUser)({ userId });
     const existingProduct = cart.items.find((p) => p.product.toString() === productId);
     if (existingProduct) {
@@ -69,6 +76,9 @@ exports.addItemToCart = addItemToCart;
 const updateItemInCart = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userId, productId, quantity, }) {
     if (quantity < 1) {
         return { data: "quantity must be at least 1", statusCode: 400 };
+    }
+    if (!mongoose_1.default.isValidObjectId(productId)) {
+        return { data: "item Dose Not Exist In Cart !", statusCode: 400 };
     }
     const cart = yield (0, exports.getActiveCartForUser)({ userId });
     const existingProduct = cart.items.find((p) => p.product.toString() === productId);
@@ -124,6 +134,9 @@ const checkout = (_a) => __awaiter(void 0, [_a], void 0, function* ({ userId, ad
     if (!cart.items || cart.items.length === 0)
         return { data: "items dose not include products", statusCode: 400 };
     for (const item of cart.items) {
+        if (!mongoose_1.default.isValidObjectId(item.product)) {
+            return { data: "Product not found", statusCode: 400 };
+        }
         const product = yield product_1.ProductModel.findById(item.product);
         if (!product)
             return { data: "Product not found", statusCode: 400 };
